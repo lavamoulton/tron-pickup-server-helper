@@ -34,7 +34,7 @@ class myClient(discord.Client):
             if message.content[0:10] == 'Fort ready':
                 self.draft_split(message.content, OUTPUT_FORT)
             if message.content[0:9] == 'TST ready':
-                return
+                self.other_split(message.content, OUTPUT_TST)
 
     def draft_split(self, message, output):
         split_message = message.split('\n')
@@ -48,6 +48,27 @@ class myClient(discord.Client):
             everyone_else[i] = self.get_user(int(everyone_else[i].lstrip('<@').rstrip('>')))
 
         write_draft(captain1, captain2, everyone_else, output)
+
+    def other_split(self, message, output):
+        split_message = message.split('\n')
+
+        first = True
+        teams_raw = []
+        final_teams = []
+        
+        for i in range(len(split_message)):
+            if first:
+                first=False
+            else:
+                teams_raw.append(split_message[i].lstrip('Team ' + str(i) + ': ').split(', '))
+
+        for team in teams_raw:
+            single_team = []
+            for player in team:
+                single_team.append(self.get_user(int(player.lstrip('<@').rstrip('>'))))
+            final_teams.append(single_team)
+
+        write_other(final_teams, output)
 
 def write_draft(captain1, captain2, everyone_else, output_file):
     f = open(output_file, 'w')
@@ -64,6 +85,21 @@ def write_draft(captain1, captain2, everyone_else, output_file):
             f.write(', ' + player.display_name)
 
     f.close()
+
+def write_other(teams, output_file):
+    f = open(output_file, 'w')
+    
+    count = 0
+    for team in teams:
+        count += 1
+        f.write('Team ' + str(count) + ': ')
+        first = True
+        for player in team:
+            if first:
+                first = False
+                f.write(player.display_name + ', ')
+            else:
+                f.write(player.display_name + '\n')
 
 
 client = myClient()
