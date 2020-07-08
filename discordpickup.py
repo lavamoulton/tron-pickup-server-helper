@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import os
 
 import discord
@@ -6,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 PICKUP_BOT = os.getenv('PICKUP_BOT')
-OUTPUT_FILE = os.getenv('OUTPUT')
+OUTPUT_WST = os.getenv('OUTPUT_WST')
 
 class myClient(discord.Client):
     async def on_ready(self):
@@ -31,7 +33,7 @@ class myClient(discord.Client):
                 print(captain2)
 
                 everyone_else = split_message[3].lstrip('Everyone else: ').split(',')
-
+                
                 for i in range(len(everyone_else)):
                     everyone_else[i] = self.get_user(int(everyone_else[i].lstrip('<@').rstrip('>')))
 
@@ -41,11 +43,18 @@ class myClient(discord.Client):
 
 
 def write_WST(captain1, captain2, everyone_else):
-    f = open(OUTPUT_FILE, 'w')
+    f = open(OUTPUT_WST, 'w')
     f.write('Captain 1: ' + captain1.display_name + '\n')
     f.write('Captain 2: ' + captain2.display_name + '\n')
+    
+    first = True
+
     for player in everyone_else:
-        f.write('Players: ' + player.display_name + ', ')
+        if first:
+            f.write('Players: ' + player.display_name)
+            first = False
+        f.write(', ' + player.display_name)
+
     f.close()
 
 
