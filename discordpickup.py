@@ -19,22 +19,26 @@ class myClient(discord.Client):
 
     async def on_message(self, message):
         if message.channel.name != CHANNEL:
-            print("I'm skipping this msg")
+            print("I've skipped a message because it is not in the correct channel")
             return
 
         if message.author == self.user:
             return
 
         if message.author.name != PICKUP_BOT:
+            print("I've skipped a message because it was not written by the Pickup Bot")
             return
 
         else:
             if message.content[0:9] == 'WST ready':
                 self.draft_split(message.content, OUTPUT_WST)
+                print("STARTING WST")
             if message.content[0:10] == 'Fort ready':
                 self.draft_split(message.content, OUTPUT_FORT)
+                print("STARTING FORT")
             if message.content[0:9] == 'TST ready':
                 self.other_split(message.content, OUTPUT_TST)
+                print("STARTING TST")
 
     def draft_split(self, message, output):
         split_message = message.split('\n')
@@ -46,7 +50,9 @@ class myClient(discord.Client):
 
         for i in range(len(everyone_else)):
             everyone_else[i] = self.get_user(int(everyone_else[i].lstrip('<@').rstrip('>')))
-
+        
+        print("DRAFT SPLIT RESULT: " + captain1.display_name + ", " + captain2.display_name)
+        print(everyone_else)
         write_draft(captain1, captain2, everyone_else, output)
 
     def other_split(self, message, output):
@@ -67,11 +73,14 @@ class myClient(discord.Client):
             for player in team:
                 single_team.append(self.get_user(int(player.lstrip('<@').rstrip('>'))))
             final_teams.append(single_team)
-
+        
+        print("OTHER SPLIT RESULT: ")
+        print(final_teams)
         write_other(final_teams, output)
 
 def write_draft(captain1, captain2, everyone_else, output_file):
     f = open(output_file, 'w')
+    print("Writing to output file: " + output_file)
     f.write('Captain 1: ' + captain1.display_name + '\n')
     f.write('Captain 2: ' + captain2.display_name + '\n')
 
@@ -87,6 +96,7 @@ def write_draft(captain1, captain2, everyone_else, output_file):
     f.close()
 
 def write_other(teams, output_file):
+    print("Writing to output file: " + output_file)
     f = open(output_file, 'w')
     
     count = 0
@@ -100,7 +110,8 @@ def write_other(teams, output_file):
                 f.write(player.display_name + ', ')
             else:
                 f.write(player.display_name + '\n')
-
+    
+    f.close()
 
 client = myClient()
 client.run(TOKEN)
